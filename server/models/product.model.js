@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
-
+import {nanoid} from "nanoid"
 const productSchema = new mongoose.Schema({
+  uid :{
+    type : String,
+    default : () => nanoid()
+  },
     name :{
         type : String,
         required : true
@@ -24,7 +28,8 @@ const productSchema = new mongoose.Schema({
     },
   attributes :[{
       name :String,
-      value :String
+      value :String,
+      keywords: []
   }],
   inStock :{
     type : Boolean,
@@ -45,16 +50,16 @@ const productSchema = new mongoose.Schema({
     type : Number,
     default : 0
   },
-  images : {
+  image : {
     type : String,
     required : true
   },
   addedBy : {
     type : mongoose.Schema.Types.ObjectId,
-    ref : "user",
-    required : true
+    ref : "user"
   }
 },
 {timestamps : true})
 
-export default mongoose.model("product" , productSchema)
+export const product =  mongoose.model("product" , productSchema)
+

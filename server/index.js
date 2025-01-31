@@ -25,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 
 await dbConnect();
 
-app.use("/api/v1/products" , productRouter);
+app.use("/api/v1/product" , productRouter);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
