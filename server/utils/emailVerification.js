@@ -19,7 +19,7 @@ export const sendVerificationEmail = async (email, token) => {
       },
     });
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify/?token=${token}`;
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email/?token=${token}`;
 
     const mailOptions = {
       from: process.env.EMAIL,
@@ -38,6 +38,7 @@ export const sendVerificationEmail = async (email, token) => {
         </div>
         <p style="font-size: 14px; color: #777; text-align: center;">If you didn't create an account, you can safely ignore this email.</p>
         <hr style="border: 0; height: 1px; background: #ddd; margin: 20px 0;">
+        <p style="text-align: center; font-size: 14px; color: #777;">This Link will expire in 1 hour.</p>
         <p style="text-align: center; font-size: 14px; color: #777;">Need help? <a href="https://yourstore.com/support" style="color: #007BFF;">Contact Support</a></p>
         <p style="text-align: center; font-size: 14px; color: #777;">&copy; ${new Date().getFullYear()} [Your Store Name]. All rights reserved.</p>
       </div>

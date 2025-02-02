@@ -24,7 +24,7 @@ export default function RegisterUser() {
     setLoading(true);
 
     try {
-      const response = await axios.post("/api/register", formData);
+      const response = await axios.post("http://localhost:5057/api/v1/user/register", formData);
       setMessage(response.data.message);
       setFormData({ name: "", email: "", password: "", phone: "" });
     } catch (err) {
