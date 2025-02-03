@@ -3,7 +3,10 @@ import { user } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-import { sendVerificationEmail, generateVerificationToken } from "../utils/emailVerification.js";
+import {
+  sendVerificationEmail,
+  generateVerificationToken,
+} from "../utils/emailVerification.js";
 
 //function to register a user (buyer by default)
 
@@ -49,17 +52,16 @@ export async function registerUser(req, res) {
     // Save user to database
     await newUser.save();
 
-  // Create a JWT token
-  const token = generateVerificationToken(email); 
+    // Create a JWT token
+    const token = generateVerificationToken(email);
 
-  // Send verification email
-  await sendVerificationEmail(email, token);
-
-
+    // Send verification email
+    await sendVerificationEmail(email, token);
 
     // Return success response (excluding password)
     return res.status(201).json({
-      message: "User registered successfully. Please verify your email and login",
+      message:
+        "User registered successfully. Please verify your email and login",
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -76,39 +78,54 @@ export async function registerUser(req, res) {
 }
 
 export async function loginUser(req, res) {
-    try {
-        const {email , password} = req.body;
+  try {
+    const { email, password } = req.body;
 
-        if(!email || !password){
-            return res.status(400).json({message : "All fields are required"});
-        }
-
-        const userToFind = await user.findOne({email});
-        if(!userToFind){
-            return res.status(404).json({message : "User not found"});
-        }
-
-        //check if user is verified
-        if(!userToFind.isEmailVerified){
-            return res.status(401).json({message : "User is not verified. Please verify your email"});
-        }
-
-        //check if password is correct    
-        const isPasswordCorrect = await bcrypt.compare(password , userToFind.password);
-        if(!isPasswordCorrect){
-            return res.status(401).json({message : "Incorrect password"});
-        }
-
-        //create a JWT token
-        const token = jwt.sign({id : user._id} , process.env.JWT_SECRET , {expiresIn : "1d"});
-
-        return res.status(200).json({message : "User logged in successfully", token});
-
-
-        
-    } catch (error) {
-        
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-}
+    const userToFind = await user.findOne({ email });
+    if (!userToFind) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
+    //check if user is verified
+    if (!userToFind.isEmailVerified) {
+      return res
+        .status(401)
+        .json({ message: "User is not verified. Please verify your email" });
+    }
+
+    //check if password is correct
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      userToFind.password
+    );
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+
+    ///Authorize user
+
+    //create a JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    //set token in cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+
+    return res
+      .status(200)
+      .json({ message: "User logged in successfully" });
+  } catch (error) {}
+}

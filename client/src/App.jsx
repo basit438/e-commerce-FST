@@ -7,7 +7,8 @@ import Layout from './pages/Layout'
 import Login from './pages/login/Login'
 import Register from './pages/register/Register'
 import VerifyEmail from './pages/VerifyEmail'
-
+import AddProduct from './pages/AddProduct'
+import Products from './pages/Products'
 import './App.css'
 
 function App() {
@@ -36,6 +37,14 @@ function App() {
         {
           path : "/verify-email",
           element : <VerifyEmail/>
+        },
+        {
+          path : "/add-product",
+          element : <AddProduct/>
+        },
+        {
+          path : "/products",
+          element : <Products/>
         }
       ]
     }
