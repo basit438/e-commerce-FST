@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import dbConnect from './db/dbconnect.db.js';
 import productRouter from './routes/productRouter.js';
 import userRouter from './routes/userRouter.js';
+import authRouter from './routes/authRouter.js';
 
 const PORT = process.env.PORT || 5000;
 
@@ -28,6 +29,8 @@ await dbConnect();
 
 app.use("/api/v1/product" , productRouter);
 app.use("/api/v1/user" , userRouter);
+app.use("/api/v1/auth" , authRouter);
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

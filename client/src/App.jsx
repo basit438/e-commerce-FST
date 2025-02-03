@@ -3,9 +3,10 @@ import {createBrowserRouter} from "react-router-dom"
 import { RouterProvider } from 'react-router-dom'
 import Home from './pages/Home'
 import About from './pages/About'
-import Layout from './pages/layout'
+import Layout from './pages/Layout'
 import Login from './pages/login/Login'
 import Register from './pages/register/Register'
+import VerifyEmail from './pages/VerifyEmail'
 
 import './App.css'
 
@@ -31,6 +32,10 @@ function App() {
         {
           path : "/register",
           element : <Register/>
+        },
+        {
+          path : "/verify-email",
+          element : <VerifyEmail/>
         }
       ]
     }
