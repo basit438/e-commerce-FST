@@ -89,7 +89,7 @@ export async function loginUser(req, res) {
         }
 
         //check if user is verified
-        if(!userToFind.isVerified){
+        if(!userToFind.isEmailVerified){
             return res.status(401).json({message : "User is not verified. Please verify your email"});
         }
 
@@ -111,3 +111,4 @@ export async function loginUser(req, res) {
     }
 
 }
+

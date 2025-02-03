@@ -1,53 +1,73 @@
-import React, { useState, useEffect } from "react";
+// VerifyEmail.js
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 function VerifyEmail() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [message, setMessage] = useState("");
-    const [loading, setLoading] = useState(true); // To prevent unnecessary rendering before API call completes
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const URLParams = new URLSearchParams(location.search);
-    const token = URLParams.get("token");
+  // Extract token from URL query parameters (e.g., ?token=exampleToken)
+  const token = new URLSearchParams(location.search).get("token");
+  console.log("Extracted token from URL:", token);
 
-    useEffect(() => {
-        if (!token) {
-            setMessage("Token not found.");
-            setLoading(false);
-            return;
+  useEffect(() => {
+    if (!token) {
+      console.error("Token missing in URL");
+      setMessage("Missing token. Please request a new verification email.");
+      return;
+    }
+
+    async function sendTokenToBackend() {
+      console.log("Sending token to backend...");
+      try {
+        const response = await axios.post(
+          "http://localhost:5057/api/v1/auth/verifyToken", // Ensure backend port is correct
+          { token },
+          { withCredentials: true }
+        );
+        console.log("Backend response:", response);
+
+        if (response.status === 200) {
+          setMessage(response.data.message);
+          // Redirect to login after 3 seconds
+          setTimeout(() => navigate("/login"), 3000);
         }
+      } catch (error) {
+        console.error("Error response from backend:", error.response || error);
+        const errorMessage =
+          error.response?.data?.message ||
+          "Verification failed. Please try again.";
+        setMessage(errorMessage);
+        // Redirect to home after 3 seconds
+        setTimeout(() => navigate("/"), 3000);
+      }
+    }
 
-        async function sendTokenToBackend() {
-            try {
-                const res = await axios.post("http://localhost:5057/api/v1/auth/verifyToken", { token });
+    sendTokenToBackend();
+  }, [token, navigate]);
 
-                if (res.status === 200) {
-                    setMessage(res.data.message);
-                    setTimeout(() => navigate("/login"), 3000);
-                } else {
-                    setMessage("Verification failed.");
-                    setTimeout(() => navigate("/register"), 3000);
-                }
-            } catch (error) {
-                setMessage("Invalid or expired token.");
-                setTimeout(() => navigate("/register"), 3000);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        sendTokenToBackend();
-    }, [token, navigate]);
-
-    if (loading) return <div>Loading...</div>;
-
+  if (!token) {
     return (
-        <div>
-            {message} <br />
-            <Link to="/">Go back Home</Link>
-        </div>
+      <div>
+        <h2>Missing Token</h2>
+        <p>
+          Go back to <Link to="/">Home</Link>
+        </p>
+      </div>
     );
+  }
+
+  return (
+    <div>
+      {message ? (
+        <h3>{message}</h3>
+      ) : (
+        <h3>Verifying email, please wait...</h3>
+      )}
+    </div>
+  );
 }
 
 export default VerifyEmail;

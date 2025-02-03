@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 
@@ -11,6 +12,8 @@ export default function LoginUser() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate(); // initialize the navigate hook
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -22,9 +25,19 @@ export default function LoginUser() {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5057/api/v1/user/login", formData);
+      const response = await axios.post(
+        "http://localhost:5057/api/v1/user/login",
+        formData
+      );
       setMessage(response.data.message);
+      
+      // Clear the form
       setFormData({ email: "", password: "" });
+      
+      // Navigate to the home page after a short delay
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
     } catch (err) {
       setError(err.response?.data?.message || "Error logging in");
     } finally {
@@ -45,7 +58,8 @@ export default function LoginUser() {
           <defs>
             <radialGradient
               id="paint0_radial"
-              cx="0" cy="0"
+              cx="0"
+              cy="0"
               r="1"
               gradientUnits="userSpaceOnUse"
               gradientTransform="translate(400 300) rotate(90) scale(300)"
@@ -66,11 +80,22 @@ export default function LoginUser() {
         <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">
           Welcome Back
         </h2>
-        {message && <p className="text-green-600 text-center font-medium mb-4">{message}</p>}
-        {error && <p className="text-red-600 text-center font-medium mb-4">{error}</p>}
+        {message && (
+          <p className="text-green-600 text-center font-medium mb-4">
+            {message}
+          </p>
+        )}
+        {error && (
+          <p className="text-red-600 text-center font-medium mb-4">
+            {error}
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-gray-700 mb-1 font-medium">
+            <label
+              htmlFor="email"
+              className="block text-gray-700 mb-1 font-medium"
+            >
               Email Address
             </label>
             <input
@@ -85,7 +110,10 @@ export default function LoginUser() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-gray-700 mb-1 font-medium">
+            <label
+              htmlFor="password"
+              className="block text-gray-700 mb-1 font-medium"
+            >
               Password
             </label>
             <input
