@@ -10,6 +10,7 @@ import VerifyEmail from './pages/VerifyEmail'
 import AddProduct from './pages/AddProduct'
 import Products from './pages/Products'
 import './App.css'
+import RegisterSeller from './pages/RegisterSeller'
 
 function App() {
 
@@ -45,6 +46,10 @@ function App() {
         {
           path : "/products",
           element : <Products/>
+        },
+        {
+          path : "/register-seller",
+          element : <RegisterSeller/>
         }
       ]
     }

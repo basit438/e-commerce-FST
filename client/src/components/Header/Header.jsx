@@ -48,6 +48,11 @@ export default function Header() {
               Products
             </Link>
           </motion.div>
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Link to="/register-seller" className="text-lg font-medium hover:text-gray-200 transition">
+              Register as Seller
+            </Link>
+          </motion.div>
         </nav>
       </div>
     </header>

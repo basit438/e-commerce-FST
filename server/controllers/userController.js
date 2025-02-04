@@ -129,3 +129,74 @@ export async function loginUser(req, res) {
       .json({ message: "User logged in successfully" });
   } catch (error) {}
 }
+
+
+
+export async function registerSeller(req, res) {
+  try {
+    const { name, email, password, phone, oldPassword } = req.body;
+    console.log(req.body);
+
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const existingUser = await user.findOne({ email });
+    if (existingUser) {
+      if (existingUser.role === "seller") {
+        return res.status(409).json({ message: "User is already registered as a seller" });
+      }
+
+      if (!oldPassword) {
+        return res.status(400).json({ message: "Old password is required to change role" });
+      }
+
+      const isPasswordMatch = await bcrypt.compare(oldPassword, existingUser.password);
+      if (!isPasswordMatch) {
+        return res.status(401).json({ message: "Incorrect old password" });
+      }
+
+      const hashedNewPassword = await bcrypt.hash(password, 10);
+      existingUser.password = hashedNewPassword;
+      existingUser.role = "seller";
+      await existingUser.save();
+
+      return res.status(200).json({
+        message: "User role updated to seller successfully",
+        user: {
+          id: existingUser._id,
+          name: existingUser.name,
+          email: existingUser.email,
+          phone: existingUser.phone,
+          role: existingUser.role,
+        },
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newSeller = new user({ name, email, password: hashedPassword, phone, role: "seller" });
+    await newSeller.save();
+
+    const token = generateVerificationToken(email);
+    await sendVerificationEmail(email, token);
+
+    return res.status(201).json({
+      message: "Seller registered successfully. Please verify your email and login",
+      user: {
+        id: newSeller._id,
+        name: newSeller.name,
+        email: newSeller.email,
+        phone: newSeller.phone,
+        role: newSeller.role,
+      },
+    });
+  } catch (error) {
+    console.error("Seller registration error:", error);
+    return res.status(500).json({ message: "Error registering seller" });
+  }
+}
