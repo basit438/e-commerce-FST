@@ -11,6 +11,7 @@ import AddProduct from './pages/AddProduct'
 import Products from './pages/Products'
 import './App.css'
 import RegisterSeller from './pages/RegisterSeller'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
 
@@ -41,7 +42,11 @@ function App() {
         },
         {
           path : "/add-product",
-          element : <AddProduct/>
+          element : (
+            <ProtectedRoute>
+              <AddProduct/>
+            </ProtectedRoute>
+          )
         },
         {
           path : "/products",

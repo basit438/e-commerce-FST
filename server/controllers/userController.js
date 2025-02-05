@@ -77,58 +77,72 @@ export async function registerUser(req, res) {
   }
 }
 
+
+
 export async function loginUser(req, res) {
   try {
     const { email, password } = req.body;
+    console.log("Login attempt for email:", email);
 
     if (!email || !password) {
+      console.log("Missing email or password");
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const userToFind = await user.findOne({ email });
     if (!userToFind) {
+      console.log("User not found for email:", email);
       return res.status(404).json({ message: "User not found" });
     }
 
-    //check if user is verified
+    // Check if user is verified
     if (!userToFind.isEmailVerified) {
+      console.log("User not verified:", email);
       return res
         .status(401)
         .json({ message: "User is not verified. Please verify your email" });
     }
 
-    //check if password is correct
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      userToFind.password
-    );
+    // Check if password is correct
+    const isPasswordCorrect = await bcrypt.compare(password, userToFind.password);
     if (!isPasswordCorrect) {
+      console.log("Incorrect password for email:", email);
       return res.status(401).json({ message: "Incorrect password" });
     }
 
-    ///Authorize user
+    // Authorize user: Create a JWT token using userToFind
+    const payload = { id: userToFind._id, email: userToFind.email };
+    console.log("JWT Payload:", payload);
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+    console.log("JWT Token generated:", token);
 
-    //create a JWT token
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    //set token in cookie
+    // Set token in cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000,
+      secure: false, // Set to true in production with HTTPS
+      sameSite: "lax", // "lax" works better in development
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
+    console.log("Cookie set with token");
 
+    const loggedInUser = {
+      id: userToFind._id,
+      name: userToFind.name,
+      email: userToFind.email,
+      phone: userToFind.phone,
+      role: userToFind.role,
+    };
 
+    console.log("User logged in successfully:", loggedInUser);
     return res
       .status(200)
-      .json({ message: "User logged in successfully" });
-  } catch (error) {}
+      .json({ message: "User logged in successfully", user: loggedInUser });
+  } catch (error) {
+    console.error("Error in loginUser:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 }
+
 
 
 
