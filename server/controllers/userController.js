@@ -7,6 +7,7 @@ import {
   sendVerificationEmail,
   generateVerificationToken,
 } from "../utils/emailVerification.js";
+import e from "express";
 
 //function to register a user (buyer by default)
 
@@ -77,8 +78,6 @@ export async function registerUser(req, res) {
   }
 }
 
-
-
 export async function loginUser(req, res) {
   try {
     const { email, password } = req.body;
@@ -104,7 +103,10 @@ export async function loginUser(req, res) {
     }
 
     // Check if password is correct
-    const isPasswordCorrect = await bcrypt.compare(password, userToFind.password);
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      userToFind.password
+    );
     if (!isPasswordCorrect) {
       console.log("Incorrect password for email:", email);
       return res.status(401).json({ message: "Incorrect password" });
@@ -113,7 +115,9 @@ export async function loginUser(req, res) {
     // Authorize user: Create a JWT token using userToFind
     const payload = { id: userToFind._id, email: userToFind.email };
     console.log("JWT Payload:", payload);
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
     console.log("JWT Token generated:", token);
 
     // Set token in cookie
@@ -143,9 +147,6 @@ export async function loginUser(req, res) {
   }
 }
 
-
-
-
 export async function registerSeller(req, res) {
   try {
     const { name, email, password, phone, oldPassword } = req.body;
@@ -163,14 +164,21 @@ export async function registerSeller(req, res) {
     const existingUser = await user.findOne({ email });
     if (existingUser) {
       if (existingUser.role === "seller") {
-        return res.status(409).json({ message: "User is already registered as a seller" });
+        return res
+          .status(409)
+          .json({ message: "User is already registered as a seller" });
       }
 
       if (!oldPassword) {
-        return res.status(400).json({ message: "Old password is required to change role" });
+        return res
+          .status(400)
+          .json({ message: "Old password is required to change role" });
       }
 
-      const isPasswordMatch = await bcrypt.compare(oldPassword, existingUser.password);
+      const isPasswordMatch = await bcrypt.compare(
+        oldPassword,
+        existingUser.password
+      );
       if (!isPasswordMatch) {
         return res.status(401).json({ message: "Incorrect old password" });
       }
@@ -193,14 +201,21 @@ export async function registerSeller(req, res) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newSeller = new user({ name, email, password: hashedPassword, phone, role: "seller" });
+    const newSeller = new user({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      role: "seller",
+    });
     await newSeller.save();
 
     const token = generateVerificationToken(email);
     await sendVerificationEmail(email, token);
 
     return res.status(201).json({
-      message: "Seller registered successfully. Please verify your email and login",
+      message:
+        "Seller registered successfully. Please verify your email and login",
       user: {
         id: newSeller._id,
         name: newSeller.name,
@@ -213,4 +228,77 @@ export async function registerSeller(req, res) {
     console.error("Seller registration error:", error);
     return res.status(500).json({ message: "Error registering seller" });
   }
+}
+
+export async function logoutUser(req, res) {
+  try {
+    // Clear the cookie named "token"
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false, // Set to true in production (with HTTPS)
+      sameSite: "lax", // Should match the cookie settings used in login
+    });
+
+    return res.status(200).json({ message: "User logged out successfully" });
+  } catch (error) {
+    console.error("Error in logoutUser:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+// function to get the user profile
+
+export async function getUserProfile(req, res) {
+  try {
+    const foundUser = await user.findById(req.user._id).select("-password");
+
+    if (!foundUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      _id: foundUser._id,
+      name: foundUser.name,
+      email: foundUser.email,
+      phone: foundUser.phone,
+      role: foundUser.role,
+      isEmailVerified: foundUser.isEmailVerified,
+      createdAt: foundUser.createdAt,
+    });
+  } catch (error) {
+    console.error("Error in getUserProfile:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+// function to update the user profile
+
+export async function updateUserProfile(req, res) {
+
+  try {
+    const updatedUser = await user.findByIdAndUpdate(req.user._id, req.body, {
+      new: true,
+    }).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      role: updatedUser.role,
+      isEmailVerified: updatedUser.isEmailVerified,
+      createdAt: updatedUser.createdAt,
+    });
+  } catch (error) {
+    console.error("Error in updateUserProfile:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+
 }

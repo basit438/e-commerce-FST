@@ -61,7 +61,8 @@ export async function addProduct(req, res) {
     
      const imgObj = await uploadToCloudinary(req.file);
      const {name , brand , category , price , description , inStock , inventory } = req.body;
-       const addedBy = req.user ? req.user._id : null;
+       const addedBy = req.user ? req.user.id : null;
+       console.log(req.user);
  
      const productToAdd = new product({
          name,
@@ -71,7 +72,7 @@ export async function addProduct(req, res) {
          description,
          inStock,
          inventory,
-         addedBy,
+         addedBy ,
          image : imgObj.secure_url,
      })
 

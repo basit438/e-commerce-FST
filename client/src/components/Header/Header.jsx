@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 export default function Header() {
+  
   return (
     <header className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white py-4 shadow-lg">
       <div className="container mx-auto flex justify-between items-center px-6">
@@ -53,6 +54,12 @@ export default function Header() {
               Register as Seller
             </Link>
           </motion.div>
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Link to="/profile" className="text-lg font-medium hover:text-gray-200 transition">
+             My Profile
+            </Link>
+          </motion.div>
+          
         </nav>
       </div>
     </header>

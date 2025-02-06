@@ -12,7 +12,7 @@ import Products from './pages/Products'
 import './App.css'
 import RegisterSeller from './pages/RegisterSeller'
 import ProtectedRoute from './components/ProtectedRoute'
-
+import Profile from './pages/Profile'
 function App() {
 
   const router = createBrowserRouter([
@@ -45,6 +45,14 @@ function App() {
           element : (
             <ProtectedRoute>
               <AddProduct/>
+            </ProtectedRoute>
+          )
+        },
+        {
+          path : "/profile",
+          element : (
+            <ProtectedRoute>
+              <Profile/>
             </ProtectedRoute>
           )
         },

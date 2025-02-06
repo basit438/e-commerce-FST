@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
-
+import { Link } from "react-router-dom";
 export default function LoginUser() {
   const [formData, setFormData] = useState({
     email: "",
@@ -138,6 +138,18 @@ export default function LoginUser() {
             {loading ? "Logging in..." : "Log In"}
           </motion.button>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-indigo-600 hover:underline transition duration-300"
+            >
+              Sign Up
+            </Link>
+          </p>
+        </div>
       </motion.div>
     </div>
   );

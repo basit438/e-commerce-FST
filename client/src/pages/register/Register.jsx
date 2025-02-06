@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 export default function RegisterUser() {
   const [formData, setFormData] = useState({
@@ -168,6 +169,23 @@ export default function RegisterUser() {
             {loading ? "Registering..." : "Sign Up"}
           </motion.button>
         </form>
+
+        <p className="text-gray-600 text-center mt-6">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-indigo-600 hover:text-indigo-800 transition duration-300"
+          >
+            Login 
+          </Link>
+          <span className="text-gray-600 text-center mt-6 p-2">or Register as a{" "}</span>
+          <Link
+            to="/register-seller"
+            className="text-indigo-600 hover:text-indigo-800 transition duration-300"
+          >
+            Seller
+          </Link>
+        </p>
       </motion.div>
     </div>
   );

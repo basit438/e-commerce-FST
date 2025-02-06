@@ -1,6 +1,7 @@
 // AddProduct.jsx
 import React, { useState } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
 
 export default function AddProduct() {
   const [formData, setFormData] = useState({
@@ -17,7 +18,6 @@ export default function AddProduct() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Handle changes for text, number, and checkbox inputs
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -26,19 +26,43 @@ export default function AddProduct() {
     });
   };
 
-  // Handle file input changes
   const handleFileChange = (e) => {
     setImageFile(e.target.files[0]);
   };
 
-  // Submit the form
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
     setError("");
 
-    // Build FormData (needed for file uploads)
+    // Validate form fields
+    if (
+      !formData.name ||
+      !formData.brand ||
+      !formData.category ||
+      !formData.price ||
+      !formData.description ||
+      !formData.inventory ||
+      !imageFile
+    ) {
+      setError("All fields are required. Please fill out the form completely.");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.price <= 0) {
+      setError("Price must be a positive number.");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.inventory < 0) {
+      setError("Inventory cannot be negative.");
+      setLoading(false);
+      return;
+    }
+
     const data = new FormData();
     data.append("name", formData.name);
     data.append("brand", formData.brand);
@@ -48,7 +72,6 @@ export default function AddProduct() {
     data.append("inStock", formData.inStock);
     data.append("inventory", formData.inventory);
 
-    // Append the file with the field name "image" to match multer's expectation.
     if (imageFile) {
       data.append("image", imageFile);
     }
@@ -58,13 +81,13 @@ export default function AddProduct() {
         "http://localhost:5057/api/v1/product/add",
         data,
         {
+          withCredentials: true,
           headers: {
             "Content-Type": "multipart/form-data",
           },
         }
       );
       setMessage(response.data.message);
-      // Reset form
       setFormData({
         name: "",
         brand: "",
@@ -83,123 +106,112 @@ export default function AddProduct() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 relative overflow-hidden p-4">
-      {/* Decorative Background */}
-      <div className="absolute inset-0 opacity-30">
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 800 600"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle
-            cx="400"
-            cy="300"
-            r="300"
-            fill="url(#paint0_radial)"
-          />
-          <defs>
-            <radialGradient
-              id="paint0_radial"
-              cx="0"
-              cy="0"
-              r="1"
-              gradientUnits="userSpaceOnUse"
-              gradientTransform="translate(400 300) rotate(90) scale(300)"
-            >
-              <stop stopColor="#ffffff" stopOpacity="0.5" />
-              <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-        </svg>
-      </div>
-
-      <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 w-full max-w-md">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="min-h-screen bg-gray-50 flex items-center justify-center p-4"
+    >
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        className="bg-white shadow-lg rounded-xl p-6 max-w-md w-full space-y-4"
+      >
+        <h2 className="text-xl font-bold text-gray-800 text-center">
           Add New Product
         </h2>
+
         {message && (
-          <p className="text-green-600 text-center font-medium mb-4">
-            {message}
-          </p>
+          <p className="text-green-600 text-center font-medium">{message}</p>
         )}
         {error && (
-          <p className="text-red-600 text-center font-medium mb-4">
-            {error}
-          </p>
+          <p className="text-red-600 text-center font-medium">{error}</p>
         )}
+
         <form
           onSubmit={handleSubmit}
           encType="multipart/form-data"
           className="space-y-4"
         >
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-gray-700 mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm text-gray-600"
+              >
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-400"
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="brand"
+                className="block text-sm text-gray-600"
+              >
+                Brand
+              </label>
+              <input
+                type="text"
+                id="brand"
+                name="brand"
+                value={formData.brand}
+                onChange={handleChange}
+                className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-400"
+                required
+              />
+            </div>
           </div>
 
-          {/* Brand */}
-          <div>
-            <label htmlFor="brand" className="block text-gray-700 mb-1">
-              Brand
-            </label>
-            <input
-              type="text"
-              id="brand"
-              name="brand"
-              value={formData.brand}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="category"
+                className="block text-sm text-gray-600"
+              >
+                Category
+              </label>
+              <input
+                type="text"
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-400"
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="price"
+                className="block text-sm text-gray-600"
+              >
+                Price
+              </label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-400"
+                min="0"
+                required
+              />
+            </div>
           </div>
 
-          {/* Category */}
           <div>
-            <label htmlFor="category" className="block text-gray-700 mb-1">
-              Category
-            </label>
-            <input
-              type="text"
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
-              required
-            />
-          </div>
-
-          {/* Price */}
-          <div>
-            <label htmlFor="price" className="block text-gray-700 mb-1">
-              Price
-            </label>
-            <input
-              type="number"
-              id="price"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
-              required
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label htmlFor="description" className="block text-gray-700 mb-1">
+            <label
+              htmlFor="description"
+              className="block text-sm text-gray-600"
+            >
               Description
             </label>
             <textarea
@@ -207,68 +219,75 @@ export default function AddProduct() {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
-              rows="3"
+              className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-400"
+              rows="2"
               required
-            />
+            ></textarea>
           </div>
 
-          {/* In Stock */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <input
               type="checkbox"
               id="inStock"
               name="inStock"
               checked={formData.inStock}
               onChange={handleChange}
-              className="mr-2"
+              className="h-4 w-4"
             />
-            <label htmlFor="inStock" className="text-gray-700">
+            <label htmlFor="inStock" className="text-sm text-gray-600">
               In Stock
             </label>
           </div>
 
-          {/* Inventory */}
-          <div>
-            <label htmlFor="inventory" className="block text-gray-700 mb-1">
-              Inventory
-            </label>
-            <input
-              type="number"
-              id="inventory"
-              name="inventory"
-              value={formData.inventory}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="inventory"
+                className="block text-sm text-gray-600"
+              >
+                Inventory
+              </label>
+              <input
+                type="number"
+                id="inventory"
+                name="inventory"
+                value={formData.inventory}
+                onChange={handleChange}
+                className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-400"
+                min="0"
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="image"
+                className="block text-sm text-gray-600"
+              >
+                Product Image
+              </label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                onChange={handleFileChange}
+                className="w-full"
+                accept="image/*"
+                required
+              />
+            </div>
           </div>
 
-          {/* Product Image */}
-          <div>
-            <label htmlFor="image" className="block text-gray-700 mb-1">
-              Product Image
-            </label>
-            <input
-              type="file"
-              id="image"
-              name="image"
-              onChange={handleFileChange}
-              className="w-full"
-              accept="image/*"
-              required
-            />
-          </div>
-
-          <button
+          <motion.button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition duration-300"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition font-semibold"
             disabled={loading}
           >
             {loading ? "Adding product..." : "Add Product"}
-          </button>
+          </motion.button>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
