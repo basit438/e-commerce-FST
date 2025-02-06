@@ -75,6 +75,7 @@ export default function ProductList() {
               <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
                 Add to Cart
               </button>
+              <button className="mt-4 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">Add to Wishlist</button>
             </motion.div>
           ))
         ) : (

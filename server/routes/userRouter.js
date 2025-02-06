@@ -7,7 +7,7 @@ const userRouter = express.Router();
 userRouter.post("/register" , registerUser); 
 userRouter.post("/login" , loginUser);
 userRouter.post("/register-seller", registerSeller)
-userRouter.get("/logout" , logoutUser);
+userRouter.post("/logout" , logoutUser);
 userRouter.get("/profile", ProtectRoute, getUserProfile)
 userRouter.put("/update-profile", ProtectRoute, updateUserProfile)
 

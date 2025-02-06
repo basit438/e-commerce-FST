@@ -1,67 +1,153 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 export default function Header() {
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await axios.get("http://localhost:5057/api/v1/user/profile", {
+          withCredentials: true,
+        });
+        setIsLoggedIn(response.status === 200);
+      } catch (err) {
+        setIsLoggedIn(false);
+      }
+    };
+    checkLoginStatus();
+  }, [location]); // re-run whenever the location changes
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("http://localhost:5057/api/v1/user/logout", null, {
+        withCredentials: true,
+      });
+      setIsLoggedIn(false);
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const navLinks = [
+    { name: "Home", to: "/" },
+    { name: "About", to: "/about" },
+    { name: "Products", to: "/products" },
+    ...(isLoggedIn ? [{ name: "My Profile", to: "/profile" }] : []),
+    ...(isLoggedIn ? [] : [{ name: "Login", to: "/login" }]),
+  ];
+
   return (
-    <header className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white py-4 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center px-6">
+    <header className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg">
+      <div className="container mx-auto flex justify-between items-center px-4 py-4 md:py-6">
         {/* Logo */}
         <motion.h1
-          className="text-2xl font-bold tracking-wide"
+          className="text-2xl md:text-3xl font-bold tracking-wide"
           whileHover={{ scale: 1.1 }}
         >
           <Link to="/">ShopEase</Link>
         </motion.h1>
 
-        {/* Navigation Links */}
-        <nav className="flex space-x-6">
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Link to="/" className="text-lg font-medium hover:text-gray-200 transition">
-              Home
-            </Link>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Link to="/about" className="text-lg font-medium hover:text-gray-200 transition">
-              About
-            </Link>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Link to="/login" className="text-lg font-medium hover:text-gray-200 transition">
-              Login
-            </Link>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Link to="/register" className="text-lg font-medium hover:text-gray-200 transition">
-              Register
-            </Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Link to="/add-product" className="text-lg font-medium hover:text-gray-200 transition">
-              Add Product
-            </Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Link to="/products" className="text-lg font-medium hover:text-gray-200 transition">
-              Products
-            </Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Link to="/register-seller" className="text-lg font-medium hover:text-gray-200 transition">
-              Register as Seller
-            </Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Link to="/profile" className="text-lg font-medium hover:text-gray-200 transition">
-             My Profile
-            </Link>
-          </motion.div>
-          
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex space-x-6">
+          {navLinks.map((link) => (
+            <motion.div
+              key={link.name}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Link
+                to={link.to}
+                className="text-lg font-medium hover:text-gray-200 transition-colors duration-200"
+              >
+                {link.name}
+              </Link>
+            </motion.div>
+          ))}
+          {isLoggedIn && (
+            <button
+              className="text-lg font-medium hover:text-gray-200 transition-colors duration-200"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          )}
         </nav>
+
+        {/* Mobile Hamburger Menu Button */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            className="focus:outline-none"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? (
+              <svg
+                className="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg
+                className="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <nav className="md:hidden bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+          <ul className="flex flex-col items-center space-y-4 py-4">
+            {navLinks.map((link) => (
+              <motion.li
+                key={link.name}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full text-center"
+              >
+                <Link
+                  onClick={() => setMobileMenuOpen(false)}
+                  to={link.to}
+                  className="block text-lg font-medium hover:text-gray-200 transition-colors duration-200 px-4 py-2"
+                >
+                  {link.name}
+                </Link>
+              </motion.li>
+            ))}
+            {isLoggedIn && (
+              <li className="w-full text-center">
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-lg font-medium hover:text-gray-200 transition-colors duration-200 px-4 py-2"
+                >
+                  Logout
+                </button>
+              </li>
+            )}
+          </ul>
+        </nav>
+      )}
     </header>
   );
 }

@@ -94,6 +94,11 @@ function Profile() {
                     My Coupons
                   </Link>
                 </li>
+                <li className="font-semibold text-gray-700">
+                  <Link to="/add-product" className="hover:text-indigo-600 transition duration-300">
+                    Add Product
+                  </Link>
+                </li>
               </>
             )}
           </ul>
@@ -129,6 +134,7 @@ function Profile() {
                     id="email"
                     placeholder="Your email"
                     value={data.email}
+                    readOnly
                     onChange={handleChange}
                     className="w-full border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
