@@ -356,3 +356,13 @@ export const addToWishlist = async (req, res) => {
   }
 };
 
+//function to get the wishlist
+
+
+export const getWishlist = async (req, res) => {
+  try {
+    res.status(200).json({ wishlist: req.user.wishlist });
+  } catch (error) {
+    res.status(500).json({ message: "error fetching wishlist" });
+  }
+}

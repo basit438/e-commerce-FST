@@ -13,6 +13,7 @@ import './App.css'
 import RegisterSeller from './pages/RegisterSeller'
 import ProtectedRoute from './components/ProtectedRoute'
 import Profile from './pages/Profile'
+import Wishlist from './pages/Wishlist'
 function App() {
 
   const router = createBrowserRouter([
@@ -53,6 +54,14 @@ function App() {
           element : (
             <ProtectedRoute>
               <Profile/>
+            </ProtectedRoute>
+          )
+        },
+        {
+          path : "/wishlist",
+          element : (
+            <ProtectedRoute>
+              <Wishlist/>
             </ProtectedRoute>
           )
         },

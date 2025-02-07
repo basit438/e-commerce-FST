@@ -31,7 +31,7 @@ export default function ProductList() {
         const response = await axios.get("http://localhost:5057/api/v1/user/wishlist", {
           withCredentials: true,
         });
-        // Even if you don't show the wishlist in your UI, you need this to set the button text correctly.
+        // Even if you don't display the wishlist in your UI, you need this to set the button text correctly.
         setWishlist(response.data.wishlist);
       } catch (error) {
         console.error("Error fetching wishlist:", error);
@@ -58,7 +58,7 @@ export default function ProductList() {
     }
   };
 
-  // Framer Motion variants for animation (optional)
+  // Framer Motion variants for container and card animations (optional)
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -108,12 +108,18 @@ export default function ProductList() {
                 >
                   {product.inStock ? "In Stock" : "Out of Stock"}
                 </p>
-                <button
+                <motion.button
                   onClick={() => handleWishlistClick(product._id)}
-                  className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`mt-4 text-white py-2 px-4 rounded-lg ${
+                    isInWishlist
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
                 >
                   {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-                </button>
+                </motion.button>
               </motion.div>
             );
           })
