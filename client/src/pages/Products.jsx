@@ -1,12 +1,15 @@
+// ProductList.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
+  const [wishlist, setWishlist] = useState([]); // holds product IDs from the user's wishlist
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Fetch products from your API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -18,22 +21,49 @@ export default function ProductList() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  // Variants for container animation (stagger children)
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+  // Fetch the current user's wishlist on component mount
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const response = await axios.get("http://localhost:5057/api/v1/user/wishlist", {
+          withCredentials: true,
+        });
+        // Even if you don't show the wishlist in your UI, you need this to set the button text correctly.
+        setWishlist(response.data.wishlist);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      }
+    };
+    fetchWishlist();
+  }, []);
+
+  // Handler to toggle wishlist status for a product
+  const handleWishlistClick = async (productId) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5057/api/v1/user/add-to-wishlist",
+        { productId },
+        { withCredentials: true }
+      );
+      // Update local wishlist state with the updated wishlist from the backend
+      setWishlist(response.data.wishlist);
+    } catch (error) {
+      console.error(
+        "Error updating wishlist:",
+        error.response?.data?.message || error.message
+      );
+    }
   };
 
-  // Variants for each product card
+  // Framer Motion variants for animation (optional)
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  };
+
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
@@ -51,33 +81,42 @@ export default function ProductList() {
         animate="visible"
       >
         {products.length > 0 ? (
-          products.map((product) => (
-            <motion.div
-              key={product._id}
-              variants={cardVariants}
-              className="bg-white shadow-lg rounded-lg p-4"
-            >
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-48 object-cover rounded-lg"
-              />
-              <h3 className="text-xl font-semibold mt-2">{product.name}</h3>
-              <p className="text-gray-600">{product.brand}</p>
-              <p className="text-gray-700 font-bold">${product.price}</p>
-              <p
-                className={`mt-2 text-sm font-semibold ${
-                  product.inStock ? "text-green-500" : "text-red-500"
-                }`}
+          products.map((product) => {
+            // Check if the product is in the wishlist by comparing IDs
+            const isInWishlist = wishlist.some(
+              (id) => id.toString() === product._id.toString()
+            );
+
+            return (
+              <motion.div
+                key={product._id}
+                variants={cardVariants}
+                className="bg-white shadow-lg rounded-lg p-4"
               >
-                {product.inStock ? "In Stock" : "Out of Stock"}
-              </p>
-              <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
-                Add to Cart
-              </button>
-              <button className="mt-4 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">Add to Wishlist</button>
-            </motion.div>
-          ))
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+                <h3 className="text-xl font-semibold mt-2">{product.name}</h3>
+                <p className="text-gray-600">{product.brand}</p>
+                <p className="text-gray-700 font-bold">${product.price}</p>
+                <p
+                  className={`mt-2 text-sm font-semibold ${
+                    product.inStock ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {product.inStock ? "In Stock" : "Out of Stock"}
+                </p>
+                <button
+                  onClick={() => handleWishlistClick(product._id)}
+                  className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+                >
+                  {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                </button>
+              </motion.div>
+            );
+          })
         ) : (
           !loading && <p className="text-gray-500 text-lg">No products available</p>
         )}

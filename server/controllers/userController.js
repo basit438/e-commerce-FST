@@ -81,22 +81,22 @@ export async function registerUser(req, res) {
 export async function loginUser(req, res) {
   try {
     const { email, password } = req.body;
-    console.log("Login attempt for email:", email);
+    
 
     if (!email || !password) {
-      console.log("Missing email or password");
+     
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const userToFind = await user.findOne({ email });
     if (!userToFind) {
-      console.log("User not found for email:", email);
+     
       return res.status(404).json({ message: "User not found" });
     }
 
     // Check if user is verified
     if (!userToFind.isEmailVerified) {
-      console.log("User not verified:", email);
+    
       return res
         .status(401)
         .json({ message: "User is not verified. Please verify your email" });
@@ -108,17 +108,17 @@ export async function loginUser(req, res) {
       userToFind.password
     );
     if (!isPasswordCorrect) {
-      console.log("Incorrect password for email:", email);
+      
       return res.status(401).json({ message: "Incorrect password" });
     }
 
     // Authorize user: Create a JWT token using userToFind
     const payload = { id: userToFind._id, email: userToFind.email };
-    console.log("JWT Payload:", payload);
+    
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
-    console.log("JWT Token generated:", token);
+  
 
     // Set token in cookie
     res.cookie("token", token, {
@@ -127,7 +127,7 @@ export async function loginUser(req, res) {
       sameSite: "lax", // "lax" works better in development
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
-    console.log("Cookie set with token");
+    
 
     const loggedInUser = {
       id: userToFind._id,
@@ -137,12 +137,12 @@ export async function loginUser(req, res) {
       role: userToFind.role,
     };
 
-    console.log("User logged in successfully:", loggedInUser);
+    
     return res
       .status(200)
       .json({ message: "User logged in successfully", user: loggedInUser });
   } catch (error) {
-    console.error("Error in loginUser:", error);
+    
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
@@ -150,7 +150,7 @@ export async function loginUser(req, res) {
 export async function registerSeller(req, res) {
   try {
     const { name, email, password, phone, oldPassword } = req.body;
-    console.log(req.body);
+   
 
     if (!name || !email || !password || !phone) {
       return res.status(400).json({ message: "All fields are required" });
@@ -241,7 +241,7 @@ export async function logoutUser(req, res) {
 
     return res.status(200).json({ message: "User logged out successfully" });
   } catch (error) {
-    console.error("Error in logoutUser:", error);
+    
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
@@ -267,7 +267,7 @@ export async function getUserProfile(req, res) {
       createdAt: foundUser.createdAt,
     });
   } catch (error) {
-    console.error("Error in getUserProfile:", error);
+   
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
@@ -302,3 +302,57 @@ export async function updateUserProfile(req, res) {
   }
 
 }
+
+//function to add a product to the wishlist
+
+export const addToWishlist = async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId) {
+      return res.status(400).json({ message: "Product ID is required" });
+    }
+
+    // Optional: Log the incoming productId for debugging
+    console.log("Received productId:", productId);
+
+    const userId = req.user._id;
+
+    // Optional: Log the authenticated user for debugging
+    console.log("Authenticated user:", req.user);
+
+    // Check if the product is already in the wishlist
+    const isAlreadyInWishlist = req.user.wishlist.some(
+      (id) => id.toString() === productId
+    );
+
+    let updatedUser;
+
+    if (isAlreadyInWishlist) {
+      // Remove the product from the wishlist
+      updatedUser = await user.findByIdAndUpdate(
+        userId,
+        { $pull: { wishlist: productId } },
+        { new: true }
+      );
+      return res.status(200).json({
+        message: "Product removed from wishlist",
+        wishlist: updatedUser.wishlist,
+      });
+    } else {
+      // Add the product to the wishlist
+      updatedUser = await user.findByIdAndUpdate(
+        userId,
+        { $addToSet: { wishlist: productId } },
+        { new: true }
+      );
+      return res.status(200).json({
+        message: "Product added to wishlist",
+        wishlist: updatedUser.wishlist,
+      });
+    }
+  } catch (error) {
+    console.error("Error in addToWishlist:", error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
