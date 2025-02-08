@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+
 export default function LoginUser() {
   const [formData, setFormData] = useState({
     email: "",
@@ -12,7 +12,12 @@ export default function LoginUser() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate(); // initialize the navigate hook
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract the "refer" query parameter from the URL. If it doesn't exist, default to "/"
+  const queryParams = new URLSearchParams(location.search);
+  const refer = queryParams.get("refer") || "/";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,20 +33,20 @@ export default function LoginUser() {
       const response = await axios.post(
         "http://localhost:5057/api/v1/user/login",
         formData,
-        { withCredentials: true },
+        { withCredentials: true }
       );
       setMessage(response.data.message);
       
       // Clear the form
       setFormData({ email: "", password: "" });
       
-      // Navigate to the home page after a short delay
+      // Redirect after a short dela
       setTimeout(() => {
-        navigate("/");
+        navigate(refer, { replace: true });
       }, 1500);
     } catch (err) {
       setError(err.response?.data?.message || "Error logging in");
-    } finally {
+    } finally {~
       setLoading(false);
     }
   };

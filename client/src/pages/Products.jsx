@@ -2,12 +2,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
   const [wishlist, setWishlist] = useState([]); // holds product IDs from the user's wishlist
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Hooks for navigation and getting current location
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Fetch products from your API
   useEffect(() => {
@@ -50,11 +57,24 @@ export default function ProductList() {
       );
       // Update local wishlist state with the updated wishlist from the backend
       setWishlist(response.data.wishlist);
+      // Display a toast notification based on the response message from the server
+      toast.success(response.data.message);
     } catch (error) {
       console.error(
         "Error updating wishlist:",
         error.response?.data?.message || error.message
       );
+      // If the error status is 401, the user is not logged in.
+      if (error.response && error.response.status === 401) {
+        toast.error("Please login to add products to your wishlist.");
+        // Redirect the user to the login page with a refer query parameter
+        setTimeout(() => {
+          const refer = encodeURIComponent(location.pathname + location.search);
+          navigate(`/login?refer=${refer}`);
+        }, 1500);
+      } else {
+        toast.error(error.response?.data?.message || "Error updating wishlist");
+      }
     }
   };
 
@@ -127,6 +147,8 @@ export default function ProductList() {
           !loading && <p className="text-gray-500 text-lg">No products available</p>
         )}
       </motion.div>
+      {/* ToastContainer to display notifications */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
     </div>
   );
 }
