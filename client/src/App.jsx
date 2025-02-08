@@ -14,6 +14,7 @@ import RegisterSeller from './pages/RegisterSeller'
 import ProtectedRoute from './components/ProtectedRoute'
 import Profile from './pages/Profile'
 import Wishlist from './pages/Wishlist'
+import SingleProduct from './pages/SingleProduct'
 function App() {
 
   const router = createBrowserRouter([
@@ -62,6 +63,14 @@ function App() {
           element : (
             <ProtectedRoute>
               <Wishlist/>
+            </ProtectedRoute>
+          )
+        },
+        {
+          path : "/product/:id",
+          element : (
+            <ProtectedRoute>
+              <SingleProduct/>
             </ProtectedRoute>
           )
         },

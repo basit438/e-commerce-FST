@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
@@ -113,12 +114,14 @@ export default function ProductList() {
                 variants={cardVariants}
                 className="bg-white shadow-lg rounded-lg p-4"
               >
+                <Link to={`/product/${product._id}`}>
                 <img
                   src={product.image}
                   alt={product.name}
                   className="w-full h-48 object-cover rounded-lg"
                 />
-                <h3 className="text-xl font-semibold mt-2">{product.name}</h3>
+                </Link>
+                <Link to={`/product/${product._id}`}><h3 className="text-xl font-semibold mt-2">{product.name}</h3></Link>
                 <p className="text-gray-600">{product.brand}</p>
                 <p className="text-gray-700 font-bold">${product.price}</p>
                 <p

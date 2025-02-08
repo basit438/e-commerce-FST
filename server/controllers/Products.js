@@ -23,34 +23,40 @@ export async function getProducts(req, res) {
 
 export async function getProduct(req, res) {
     try {
-        const keyword = req.params.id
-        let productToFind;
-
-        // check if product id is provided
-        if(!keyword){
-            return res.status(404).json({ message: "Provide a product id" });
-        }
-
-        //finding by mongoose id
-
-        if(mongoose.Types.ObjectId.isValid(keyword)){
-            productToFind = await product.findById(keyword);
-        }else
-        // finding by uid
-        {
-            productToFind = await product.findOne({uid : keyword});
-        }
-
-        if (!productToFind) {
-            return res.status(404).json({ message: "Product not found" });
-        }
-        return res.status(200).json({ product: productToFind });
-
-     
+      const keyword = req.params.id;
+      console.log("Received product keyword:", keyword);
+  
+      // Check if product id is provided
+      if (!keyword) {
+        console.log("No product id provided in the request.");
+        return res.status(404).json({ message: "Provide a product id" });
+      }
+  
+      let productToFind;
+  
+      // Determine whether to search by ObjectId or by uid
+      if (mongoose.Types.ObjectId.isValid(keyword)) {
+        console.log("Keyword is a valid ObjectId. Searching using findById.");
+        productToFind = await product.findById(keyword);
+      } else {
+        console.log("Keyword is not a valid ObjectId. Searching using findOne with uid.");
+        productToFind = await product.findOne({ uid: keyword });
+      }
+  
+      console.log("Result from database:", productToFind);
+  
+      if (!productToFind) {
+        console.log("No product found for keyword:", keyword);
+        return res.status(404).json({ message: "Product not found" });
+      }
+  
+      console.log("Product found successfully. Returning product.");
+      return res.status(200).json({ product: productToFind });
     } catch (error) {
-        return res.status(500).json({ message: "error fetching product" });
+      console.error("Error fetching product:", error);
+      return res.status(500).json({ message: "error fetching product", error: error });
     }
-}
+  }
 
 
 //function to add a product
