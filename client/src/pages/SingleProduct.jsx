@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import  useCart  from '../hooks/useCart';
 
 function SingleProduct() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);   // Holds product data
   const [loading, setLoading] = useState(true);     // Indicates loading state
   const [error, setError] = useState(null);         // Holds error message if any
+  const { addToCart } = useCart();
+
 
   useEffect(() => {
     // Define an async function to fetch the product data

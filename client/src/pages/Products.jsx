@@ -39,7 +39,9 @@ export default function ProductList() {
         const response = await axios.get("http://localhost:5057/api/v1/user/wishlist", {
           withCredentials: true,
         });
-        // Even if you don't display the wishlist in your UI, you need this to set the button text correctly.
+        
+
+        // Update the local state with the wishlist data from the server just to show the user what's in their wishlist
         setWishlist(response.data.wishlist);
       } catch (error) {
         console.error("Error fetching wishlist:", error);
