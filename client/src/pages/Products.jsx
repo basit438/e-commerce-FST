@@ -1,11 +1,10 @@
 // ProductList.js
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import instance from "../axiosConfig";
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
@@ -21,7 +20,7 @@ export default function ProductList() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5057/api/v1/product/get");
+        const response = await instance.get("product/get");
         setProducts(response.data.products);
       } catch (err) {
         setError("Failed to fetch products. Please try again later.");
@@ -36,12 +35,9 @@ export default function ProductList() {
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
-        const response = await axios.get("http://localhost:5057/api/v1/user/wishlist", {
+        const response = await instance.get("user/wishlist", {
           withCredentials: true,
         });
-        
-
-        // Update the local state with the wishlist data from the server just to show the user what's in their wishlist
         setWishlist(response.data.wishlist);
       } catch (error) {
         console.error("Error fetching wishlist:", error);
@@ -53,24 +49,20 @@ export default function ProductList() {
   // Handler to toggle wishlist status for a product
   const handleWishlistClick = async (productId) => {
     try {
-      const response = await axios.post(
-        "http://localhost:5057/api/v1/user/add-to-wishlist",
+      const response = await instance.post(
+        "user/add-to-wishlist",
         { productId },
         { withCredentials: true }
       );
-      // Update local wishlist state with the updated wishlist from the backend
       setWishlist(response.data.wishlist);
-      // Display a toast notification based on the response message from the server
       toast.success(response.data.message);
     } catch (error) {
       console.error(
         "Error updating wishlist:",
         error.response?.data?.message || error.message
       );
-      // If the error status is 401, the user is not logged in.
       if (error.response && error.response.status === 401) {
         toast.error("Please login to add products to your wishlist.");
-        // Redirect the user to the login page with a refer query parameter
         setTimeout(() => {
           const refer = encodeURIComponent(location.pathname + location.search);
           navigate(`/login?refer=${refer}`);
@@ -93,67 +85,84 @@ export default function ProductList() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Product List</h2>
-      {loading && <p className="text-blue-500 text-lg">Loading products...</p>}
-      {error && <p className="text-red-500 text-lg">{error}</p>}
-      <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {products.length > 0 ? (
-          products.map((product) => {
-            // Check if the product is in the wishlist by comparing IDs
-            const isInWishlist = wishlist.some(
-              (id) => id.toString() === product._id.toString()
-            );
+    <div className="min-h-screen bg-gray-100 py-6">
+      <div className="max-w-6xl mx-auto px-4">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Products</h2>
+        {loading && <p className="text-blue-500 text-lg">Loading products...</p>}
+        {error && <p className="text-red-500 text-lg">{error}</p>}
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {products.length > 0 ? (
+            products.map((product) => {
+              // Check if the product is in the wishlist by comparing IDs
+              const isInWishlist = wishlist.some(
+                (id) => id.toString() === product._id.toString()
+              );
 
-            return (
-              <motion.div
-                key={product._id}
-                variants={cardVariants}
-                className="bg-white shadow-lg rounded-lg p-4"
-              >
-                <Link to={`/product/${product._id}`}>
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-                </Link>
-                <Link to={`/product/${product._id}`}><h3 className="text-xl font-semibold mt-2">{product.name}</h3></Link>
-                <p className="text-gray-600">{product.brand}</p>
-                <p className="text-gray-700 font-bold">${product.price}</p>
-                <p
-                  className={`mt-2 text-sm font-semibold ${
-                    product.inStock ? "text-green-500" : "text-red-500"
-                  }`}
+              return (
+                <motion.div
+                  key={product._id}
+                  variants={cardVariants}
+                  className="bg-white border border-gray-200 rounded p-3 hover:shadow-xl transition transform hover:scale-105 flex flex-col"
                 >
-                  {product.inStock ? "In Stock" : "Out of Stock"}
-                </p>
-                <motion.button
-                  onClick={() => handleWishlistClick(product._id)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`mt-4 text-white py-2 px-4 rounded-lg ${
-                    isInWishlist
-                      ? "bg-red-500 hover:bg-red-600"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  }`}
-                >
-                  {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-                </motion.button>
-              </motion.div>
-            );
-          })
-        ) : (
-          !loading && <p className="text-gray-500 text-lg">No products available</p>
-        )}
-      </motion.div>
-      {/* ToastContainer to display notifications */}
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+                  <Link to={`/product/${product._id}`}>
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="h-40 w-full object-contain mb-2"
+                    />
+                  </Link>
+                  <Link to={`/product/${product._id}`}>
+                    <h3 className="text-sm font-semibold text-gray-800 mb-1 line-clamp-2">
+                      {product.name}
+                    </h3>
+                  </Link>
+                  <p className="text-xs text-gray-600 mb-1">{product.brand}</p>
+                  <p className="text-base font-bold text-gray-900 mb-1">
+                    ${product.price}
+                  </p>
+                  <p
+                    className={`text-xs font-medium mb-2 ${
+                      product.inStock ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {product.inStock ? "In Stock" : "Out of Stock"}
+                  </p>
+                  <motion.button
+                    onClick={() => handleWishlistClick(product._id)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`text-xs font-semibold py-1 px-2 rounded ${
+                      isInWishlist
+                        ? "bg-red-500 hover:bg-red-600 text-white"
+                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                    }`}
+                  >
+                    {isInWishlist ? "Remove" : "Wishlist"}
+                  </motion.button>
+                 
+                   
+                </motion.div>
+              );
+            })
+          ) : (
+            !loading && (
+              <p className="col-span-full text-center text-gray-500 text-lg">
+                No products available
+              </p>
+            )
+          )}
+        </motion.div>
+      </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+      />
     </div>
   );
 }

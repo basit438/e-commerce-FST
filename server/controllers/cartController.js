@@ -1,6 +1,8 @@
 import { Cart } from '../models/cart.model.js';
 import { user } from '../models/user.model.js';
 import { product } from '../models/product.model.js';
+
+
 // function to add product to cart
 export async function addToCart(req, res) {
 try {
@@ -39,13 +41,16 @@ try {
 
     cart.totalPrice = totalPrice;
 
-    
+
     
 
     // save the updated cart
     await cart.save();
+//populate the cart with the product and user
 
-    res.status(200).json({ message: 'Product added to cart successfully' });
+ await cart.populate("items.product");
+
+    res.status(200).json({ cart });
 } catch (error) {
     
 }
@@ -53,7 +58,17 @@ try {
 
 // function to get all products in the cart
 export async function getCart(req, res) {
+    try {
+        const userId = req.user._id;
+        const cart = await Cart.findOne({ user: userId }).populate("items.product");
+        if (!cart) {
+            return res.status(200).json({ cart : { items: [], totalPrice: 0 } });
 
+        }
+        return res.status(200).json({ cart });
+    } catch (error) {
+        
+    }
 };
 
 

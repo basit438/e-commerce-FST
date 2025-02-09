@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import useCart  from "../../hooks/useCart"; // Ensure your hook returns { cart, ... }
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { cart } = useCart(); // Assuming cart is an object like { items: [] }
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -21,7 +23,7 @@ export default function Header() {
       }
     };
     checkLoginStatus();
-  }, [location]); // re-run whenever the location changes
+  }, [location, isLoggedIn, cart]); // re-run whenever the location changes
 
   const handleLogout = async () => {
     try {
@@ -35,13 +37,34 @@ export default function Header() {
     }
   };
 
+  // Build the navigation links.
   const navLinks = [
     { name: "Home", to: "/" },
     { name: "About", to: "/about" },
     { name: "Products", to: "/products" },
     ...(isLoggedIn ? [{ name: "My Profile", to: "/profile" }] : []),
-    ...(isLoggedIn ? [] : [{ name: "Login", to: "/login" }]),
+    ...(!isLoggedIn ? [
+      { name: "Login", to: "/login" },
+      { name: "Register", to: "/register" }
+    ] : []),
   ];
+
+  // Add the Cart link (with badge) if the user is logged in.
+  if (isLoggedIn) {
+    navLinks.push({
+      name: (
+        <div className="relative inline-block">
+          <span>Cart</span>
+          {cart?.items?.length > 0 && (
+            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {cart.items.length}
+            </span>
+          )}
+        </div>
+      ),
+      to: "/cart",
+    });
+  }
 
   return (
     <header className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg">
@@ -56,9 +79,9 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-6">
-          {navLinks.map((link) => (
+          {navLinks.map((link, index) => (
             <motion.div
-              key={link.name}
+              key={index}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -116,9 +139,9 @@ export default function Header() {
       {mobileMenuOpen && (
         <nav className="md:hidden bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
           <ul className="flex flex-col items-center space-y-4 py-4">
-            {navLinks.map((link) => (
+            {navLinks.map((link, index) => (
               <motion.li
-                key={link.name}
+                key={index}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="w-full text-center"
