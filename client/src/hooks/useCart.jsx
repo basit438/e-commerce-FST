@@ -1,18 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import instance from "../axiosConfig";
 import { toast } from "react-toastify";
-import { useEffect } from "react";
 
 function useCart() {
   const navigate = useNavigate();
   const location = useLocation();
   const [cart, setCart] = useState({ items: [] });
 
+  // Run fetchCart only once on mount
   useEffect(() => {
     fetchCart();
-  }, [ cart.items.length ]);
-
+  }, []);
 
   async function addToCart(productId, quantity = 1) {
     try {
@@ -25,10 +24,9 @@ function useCart() {
       setCart(response.data.cart);
       toast.success("Product added to cart!");
     } catch (error) {
-      // If the error status is 401, the user is not logged in.
       if (error.response && error.response.status === 401) {
         toast.error("Please login to add products to your cart.");
-        // Get the current URL so the user can be redirected back after login
+        // Redirect the user to login with a refer parameter
         const refer = encodeURIComponent(location.pathname + location.search);
         navigate(`/login?refer=${refer}`);
       } else {
@@ -49,7 +47,39 @@ function useCart() {
     }
   }
 
-  return { addToCart, cart, fetchCart };
+  async function updateQuantity(productId, quantity) {
+    try {
+      const response = await instance.put(
+        "cart/update",
+        { productId, quantity },
+        { withCredentials: true }
+      );
+      console.log("Cart updated:", response.data);
+      setCart(response.data.cart);
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      toast.error("Failed to update cart. Please try again later.");
+    }
+  }
+
+  async function removeFromCart(productId) {
+    try {
+      const response = await instance.delete("cart/remove/" + productId, {
+        withCredentials: true,
+      });
+      console.log("Product removed from cart:", response.data);
+      // Update the cart state with the new cart data:
+      setCart(response.data.cart);
+      toast.success("Product removed from cart!");
+    } catch (error) {
+      console.error("Error removing product from cart:", error);
+      toast.error(
+        "Failed to remove product from cart. Please try again later."
+      );
+    }
+  }
+
+  return { addToCart, cart, fetchCart, updateQuantity, removeFromCart };
 }
 
 export default useCart;

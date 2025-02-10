@@ -1,7 +1,7 @@
 import express from "express";
 
 const cartRouter = express.Router();
-import { addToCart, getCart, updateCart, deleteFromCart } from "../controllers/cartController.js";
+import { addToCart, getCart, updateCart, removeFromCart } from "../controllers/cartController.js";
 import { ProtectRoute } from "../middlewares/auth.js";
 
 
@@ -15,6 +15,6 @@ cartRouter.get("/", ProtectRoute, getCart);
 cartRouter.put("/update", ProtectRoute, updateCart);
 
 // Delete a product from the cart
-cartRouter.delete("/remove/:id", ProtectRoute, deleteFromCart);
+cartRouter.delete("/remove/:id", ProtectRoute, removeFromCart);
 
 export default cartRouter;

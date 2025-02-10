@@ -9,7 +9,7 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { cart } = useCart(); // Assuming cart is an object like { items: [] }
+  const { cart , fetchCart } = useCart(); // Assuming cart is an object like { items: [] }
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -24,7 +24,9 @@ export default function Header() {
     };
     checkLoginStatus();
   }, [location, isLoggedIn, cart]); // re-run whenever the location changes
-
+useEffect(() => {
+  fetchCart();
+},[])   
   const handleLogout = async () => {
     try {
       await axios.post("http://localhost:5057/api/v1/user/logout", null, {
