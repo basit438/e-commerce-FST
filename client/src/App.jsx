@@ -16,12 +16,21 @@ import Profile from './pages/Profile'
 import Wishlist from './pages/Wishlist'
 import SingleProduct from './pages/SingleProduct'
 import Cart from './pages/Cart'
+import CartProvider from './context/CartProvider'
 function App() {
+
+  function AppWrapper () {
+    return(
+      <CartProvider>
+        <Layout/>
+      </CartProvider>
+    )
+  }
 
   const router = createBrowserRouter([
     {
       path:"/",
-      element : <Layout/>,
+      element : <AppWrapper/>,
       children:  [
         {
         path : "/",
@@ -94,7 +103,9 @@ function App() {
   
   return (
     <>
+   
       <RouterProvider router={router}/>
+    
     </>
   )
 }

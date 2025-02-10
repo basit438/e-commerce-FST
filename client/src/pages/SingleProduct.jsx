@@ -5,6 +5,7 @@ import useCart from '../hooks/useCart';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
 function SingleProduct() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);   // Holds product data
