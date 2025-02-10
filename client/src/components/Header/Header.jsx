@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import useCart  from "../../hooks/useCart"; // Ensure your hook returns { cart, ... }
+import instance from "../../axiosConfig";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -14,7 +15,7 @@ export default function Header() {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const response = await axios.get("http://localhost:5057/api/v1/user/profile", {
+        const response = await instance.get("user/profile", {
           withCredentials: true,
         });
         setIsLoggedIn(response.status === 200);
@@ -29,7 +30,7 @@ useEffect(() => {
 },[])   
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:5057/api/v1/user/logout", null, {
+      await instance.post("user/logout", {}, {
         withCredentials: true,
       });
       setIsLoggedIn(false);

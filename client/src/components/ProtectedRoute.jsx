@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import instance from "../axiosConfig";
 
 function ProtectedRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -13,7 +14,7 @@ function ProtectedRoute({ children }) {
   async function validateToken() {
     try {
       console.log("Calling check-auth endpoint...");
-      const response = await axios.get("http://localhost:5057/api/v1/auth/check-auth", {
+      const response = await instance.get("auth/check-auth", {
         withCredentials: true,
       });
       console.log("Check-auth response received:", response.data);

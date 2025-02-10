@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import instance from "../axiosConfig";
 
 export default function AddProduct() {
   const [formData, setFormData] = useState({
@@ -77,8 +78,8 @@ export default function AddProduct() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:5057/api/v1/product/add",
+      const response = await instance.post(
+        "product/add",
         data,
         {
           withCredentials: true,

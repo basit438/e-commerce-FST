@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import instance from "../../axiosConfig";
 
 export default function RegisterUser() {
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ export default function RegisterUser() {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5057/api/v1/user/register", formData);
+      const response = await instance.post("user/register", formData);
       setMessage(response.data.message);
       setFormData({ name: "", email: "", password: "", phone: "" });
     } catch (err) {

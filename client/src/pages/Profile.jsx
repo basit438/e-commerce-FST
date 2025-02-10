@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import instance from "../axiosConfig";
 
 function Profile() {
   const [data, setData] = useState({});
@@ -15,7 +16,7 @@ function Profile() {
 
   async function fetchData() {
     try {
-      const response = await axios.get("http://localhost:5057/api/v1/user/profile", {
+      const response = await instance.get("user/profile", {
         withCredentials: true,
       });
       console.log(response.data);
@@ -35,7 +36,7 @@ function Profile() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const response = await axios.put("http://localhost:5057/api/v1/user/update-profile", data, {
+      const response = await instance.put("user/update-profile", data, {
         withCredentials: true,
       });
       if (response.status === 200) {

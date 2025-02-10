@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import instance from "../axiosConfig";
 
 function VerifyEmail() {
   const [message, setMessage] = useState("");
@@ -22,8 +23,8 @@ function VerifyEmail() {
     async function sendTokenToBackend() {
       console.log("Sending token to backend...");
       try {
-        const response = await axios.post(
-          "http://localhost:5057/api/v1/auth/verifyToken", // Ensure backend port is correct
+        const response = await instance.post(
+          "auth/verifyToken",
           { token },
           { withCredentials: true }
         );

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import instance from '../axiosConfig';
+
 
 const RegisterSeller = () => {
   const [formData, setFormData] = useState({
@@ -24,7 +26,7 @@ const RegisterSeller = () => {
     setMessage('');
     setError('');
     try {
-      const response = await axios.post('http://localhost:5057/api/v1/user/register-seller', formData);
+      const response = await instance.post('user/register-seller', formData);
       setMessage(response.data.message);
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {

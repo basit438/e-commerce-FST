@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
+import instance from "../../axiosConfig";
 
 export default function LoginUser() {
   const [formData, setFormData] = useState({
@@ -30,8 +31,8 @@ export default function LoginUser() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5057/api/v1/user/login",
+      const response = await instance.post(
+        "user/login",
         formData,
         { withCredentials: true }
       );
