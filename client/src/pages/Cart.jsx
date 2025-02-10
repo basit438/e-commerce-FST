@@ -26,13 +26,14 @@ function Cart() {
   }
 
   return (
-    <>
-      <div className="container mx-auto px-8 py-4">
-        <h1 className="text-2xl font-bold mb-6">Shopping Cart</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items - Left Side */}
-          <div className="lg:col-span-2 space-y-4">
-            {cart.items.map((item) => (
+    <div className="container mx-auto px-8 py-4">
+      <h1 className="text-2xl font-bold mb-6">Shopping Cart</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Cart Items - Left Side */}
+        <div className="lg:col-span-2 space-y-4">
+          {cart?.items
+            ?.filter((item) => item.product !== null)
+            .map((item) => (
               <div
                 key={item.product._id}
                 className="border rounded-lg p-4 flex gap-4"
@@ -80,49 +81,48 @@ function Cart() {
                 </div>
               </div>
             ))}
-          </div>
-          {/* Cart Summary - Right Side */}
-          <div className="lg:col-span-1 space-y-4">
-            <div className="border rounded-lg p-4 sticky top-4">
-              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              <div className="space-y-2 pb-4 border-b">
-                <div className="flex justify-between mb-2">
-                  <span>Subtotal:</span>
-                  <span className="flex items-center font-bold">
-                    <LiaRupeeSignSolid />
-                    {cart.totalPrice.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span>Shipping:</span>
-                  <span className="flex items-center font-bold">
-                    <LiaRupeeSignSolid />
-                    Free
-                  </span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span>Tax:</span>
-                  <span className="flex items-center font-bold">
-                    <LiaRupeeSignSolid />
-                    0.00
-                  </span>
-                </div>
-              </div>
-              <div className="flex justify-between py-4 font-bold">
-                <span>Total:</span>
-                <span className="flex items-center">
+        </div>
+        {/* Cart Summary - Right Side */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="border rounded-lg p-4 sticky top-4">
+            <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+            <div className="space-y-2 pb-4 border-b">
+              <div className="flex justify-between mb-2">
+                <span>Subtotal:</span>
+                <span className="flex items-center font-bold">
                   <LiaRupeeSignSolid />
                   {cart.totalPrice.toFixed(2)}
                 </span>
               </div>
-              <button className="w-full bg-blue-500 text-white py-2 rounded">
-                Proceed to Checkout
-              </button>
+              <div className="flex justify-between mb-2">
+                <span>Shipping:</span>
+                <span className="flex items-center font-bold">
+                  <LiaRupeeSignSolid />
+                  Free
+                </span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span>Tax:</span>
+                <span className="flex items-center font-bold">
+                  <LiaRupeeSignSolid />
+                  0.00
+                </span>
+              </div>
             </div>
+            <div className="flex justify-between py-4 font-bold">
+              <span>Total:</span>
+              <span className="flex items-center">
+                <LiaRupeeSignSolid />
+                {cart.totalPrice.toFixed(2)}
+              </span>
+            </div>
+            <button className="w-full bg-blue-500 text-white py-2 rounded">
+              Proceed to Checkout
+            </button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

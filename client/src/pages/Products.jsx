@@ -12,7 +12,6 @@ export default function ProductList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Hooks for navigation and getting current location
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,8 +38,8 @@ export default function ProductList() {
           withCredentials: true,
         });
         setWishlist(response.data.wishlist);
-      } catch (error) {
-        console.error("Error fetching wishlist:", error);
+      } catch (err) {
+        console.error("Error fetching wishlist:", err);
       }
     };
     fetchWishlist();
@@ -56,27 +55,28 @@ export default function ProductList() {
       );
       setWishlist(response.data.wishlist);
       toast.success(response.data.message);
-    } catch (error) {
-      console.error(
-        "Error updating wishlist:",
-        error.response?.data?.message || error.message
-      );
-      if (error.response && error.response.status === 401) {
+    } catch (err) {
+      console.error("Error updating wishlist:", err.response?.data?.message || err.message);
+      if (err.response && err.response.status === 401) {
         toast.error("Please login to add products to your wishlist.");
         setTimeout(() => {
           const refer = encodeURIComponent(location.pathname + location.search);
           navigate(`/login?refer=${refer}`);
         }, 1500);
       } else {
-        toast.error(error.response?.data?.message || "Error updating wishlist");
+        toast.error(err.response?.data?.message || "Error updating wishlist");
       }
     }
   };
 
-  // Framer Motion variants for container and card animations (optional)
+  // Helper to check if a product is in the wishlist
+  const isInWishlist = (productId) =>
+    wishlist.some((id) => id.toString() === productId.toString());
+
+  // Framer Motion variants for card animations
   const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.1 } },
   };
 
   const cardVariants = {
@@ -85,78 +85,88 @@ export default function ProductList() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
-      <div className="max-w-6xl mx-auto px-4">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Products</h2>
-        {loading && <p className="text-blue-500 text-lg">Loading products...</p>}
-        {error && <p className="text-red-500 text-lg">{error}</p>}
-        <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {products.length > 0 ? (
-            products.map((product) => {
-              // Check if the product is in the wishlist by comparing IDs
-              const isInWishlist = wishlist.some(
-                (id) => id.toString() === product._id.toString()
-              );
-
-              return (
+    <div className="min-h-screen bg-gray-50 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">Our Products</h1>
+        {loading ? (
+          <div className="flex justify-center">
+            <p className="text-xl text-blue-500">Loading products...</p>
+          </div>
+        ) : error ? (
+          <div className="flex justify-center">
+            <p className="text-xl text-red-500">{error}</p>
+          </div>
+        ) : (
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {products.length > 0 ? (
+              products.map((product) => (
                 <motion.div
                   key={product._id}
                   variants={cardVariants}
-                  className="bg-white border border-gray-200 rounded p-3 hover:shadow-xl transition transform hover:scale-105 flex flex-col"
+                  className="relative bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition duration-300 flex flex-col"
                 >
                   <Link to={`/product/${product._id}`}>
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="h-40 w-full object-contain mb-2"
-                    />
+                    {/* Fixed container for image so it fits uniformly */}
+                    <div className="w-full h-48 flex items-center justify-center bg-gray-100">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
                   </Link>
-                  <Link to={`/product/${product._id}`}>
-                    <h3 className="text-sm font-semibold text-gray-800 mb-1 line-clamp-2">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  <p className="text-xs text-gray-600 mb-1">{product.brand}</p>
-                  <p className="text-base font-bold text-gray-900 mb-1">
-                    ${product.price}
-                  </p>
-                  <p
-                    className={`text-xs font-medium mb-2 ${
-                      product.inStock ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {product.inStock ? "In Stock" : "Out of Stock"}
-                  </p>
-                  <motion.button
-                    onClick={() => handleWishlistClick(product._id)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`text-xs font-semibold py-1 px-2 rounded ${
-                      isInWishlist
-                        ? "bg-red-500 hover:bg-red-600 text-white"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }`}
-                  >
-                    {isInWishlist ? "Remove" : "Wishlist"}
-                  </motion.button>
-                 
-                   
+                  <div className="p-4 flex flex-col flex-grow">
+                    <Link to={`/product/${product._id}`}>
+                      <h2 className="text-lg font-semibold text-gray-800 line-clamp-2">
+                        {product.name}
+                      </h2>
+                    </Link>
+                    <p className="mt-1 text-sm text-gray-500">{product.brand}</p>
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className="text-xl font-bold text-gray-900">
+                        ${product.price}
+                      </span>
+                      <motion.button
+                        onClick={() => handleWishlistClick(product._id)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`px-3 py-1 text-sm rounded ${
+                          isInWishlist(product._id)
+                            ? "bg-red-500 hover:bg-red-600 text-white"
+                            : "bg-blue-500 hover:bg-blue-600 text-white"
+                        }`}
+                      >
+                        {isInWishlist(product._id) ? "Remove" : "Wishlist"}
+                      </motion.button>
+                    </div>
+                    <div className="mt-4">
+                      <Link to={`/product/${product._id}`}>
+                        <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                  {/* Optional overlay for out-of-stock products */}
+                  {!product.inStock && (
+                    <div className="absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                      <span className="text-white text-lg font-semibold">Out of Stock</span>
+                    </div>
+                  )}
                 </motion.div>
-              );
-            })
-          ) : (
-            !loading && (
-              <p className="col-span-full text-center text-gray-500 text-lg">
-                No products available
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-600 text-xl">
+                No products available.
               </p>
-            )
-          )}
-        </motion.div>
+            )}
+          </motion.div>
+        )}
       </div>
       <ToastContainer
         position="top-right"
