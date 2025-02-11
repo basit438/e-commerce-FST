@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 import { user } from "../models/user.model.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import {
   sendVerificationEmail,
   generateVerificationToken,
 } from "../utils/emailVerification.js";
-import e from "express";
+import express from "express";
 
 //function to register a user (buyer by default)
 
